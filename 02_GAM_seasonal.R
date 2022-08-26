@@ -18,7 +18,7 @@ freq$date <- as.Date(freq$date, format="%d/%m/%Y")
 
 # Do some models
 # First one without a correlation argumnet
-m1 <- gamm(obs ~ s(Month, bs = "cc", k = 12) + s(total_months), family=poisson,
+m1 <- gam(obs ~ s(Month, bs = "cc", k = 12) + s(total_months), family=poisson,
           data = freq)
 summary(m1$gam) #r2 = 0.471, F = 2.787, t = 22.87
 
@@ -104,18 +104,20 @@ layout(matrix(1:2, ncol = 2))
 plot(m1$gam, scale = 0)
 layout(1)
 
-# make a pretty plot of the best model (m1)
-b <- getViz(m1$gam)
-o <- plot(sm(b, 1))
-o + l_fitLine(colour = "black") + #l_rug(mapping = aes(x=x, y=y), alpha = 5.0) +
-  l_ciLine(level = 0.95, mul = 5, colour = "black", linetype = 2) +
-  scale_x_continuous(name="Month", breaks=c(1,2,3,4,5,6,7,8,9,10,11,12), 
-                     labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
-                     limits=c(1, 12))+ geom_hline(yintercept = 0, lty=3) +
-  ylab("Smoothed number of detections") + 
-  theme_bw(base_size = 14) +
-  theme(panel.grid.major = element_blank(), 
-                          panel.grid.minor = element_blank(),
-                          panel.background = element_rect(colour = "black", size=1))
 
+pdf("Fig_2.pdf", width=8, height=6)
+
+plot(m1,
+     select = 1,
+     seWithMean = TRUE,
+     shift = coef(m1)[1],
+     trans = exp, 
+     ylab = "Number of carcasses",
+     xaxt = "n",
+     yaxt = "n",
+     ylim = c(0,20))
+axis(side = 1, at = 1:12, labels = month(1:12, label = T))
+axis(side = 2, at = 0:20)
+# insert ggplot code
+dev.off()
 
